@@ -57,8 +57,8 @@ class QuadTree{
             
             root->t_range = 10.0;
             root->b_range = 0.0;
-            root->r_range = 0.0;
-            root->l_range = 10.0;
+            root->r_range = 10.0;
+            root->l_range = 0.0;    
 
             printf("Quad Tree is inited with one root node ... \n");
         }
@@ -69,6 +69,7 @@ class QuadTree{
 
         /* if necessary, update corresponding node based on lidar info list */
         void update_tree(LidarNode header){
+            printf("=== start update tree with lidar info ...\n");
             LidarNode p = header;
             while(p -> next != NULL){
                 p = p -> next;
@@ -79,11 +80,11 @@ class QuadTree{
                 float y = walker_y + p->dist * cos(p->theta * PI / 180);
 
                 TreeNode node = find_which_node(root, x, y);
-                // printf("find node with radius: %f\n", node->radius);
+                printf("\t=== find point (%f, %f) in leaf node with radius: %f\n", x, y, node->radius);
                 extend_children(node, x, y);
             }
 
-            printf("update tree done \n");
+            printf("=== update tree done. \n");
         }
 
         // TODO:    
@@ -99,11 +100,13 @@ class QuadTree{
     private:
         /* begin from arbitrary node to extend */
         void extend_children(TreeNode node, float x, float y){
-            // printf("extend children to node with radius: %f \n", node->radius);
             /* can not extend */
             if(node -> radius < 0.5){
+                printf("\t\textended to minimum unit; \n");
                 return;
             }
+
+            printf("\t\textend children for node with radius: %f \n", node->radius);
             
             /* split four children */
             TreeNode rt = (TreeNode)malloc(sizeof(struct tree_node));
@@ -153,21 +156,32 @@ class QuadTree{
             extend_children(belong_node, x, y);
         }
         
-        /* begin from one node (usually root), find leaf node belongs to */
+        /* begin from one node, find leaf node belongs to */
         TreeNode find_which_node(TreeNode node, float point_x, float point_y){
             /* find until leaf node */
-            if (node->lt == NULL){
+            if (node->rt == NULL){
                 return node;
             }
 
-            if(node->l_range < point_x <= (node->l_range + node->r_range) / 2 && (node->b_range + node->t_range) / 2 < point_y < node->t_range){
+            // printf("node l_range: %f\n", node->l_range);
+            // printf("node r_range: %f\n", node->r_range);
+            // printf("node t_range: %f\n", node->t_range);
+            // printf("node b_range: %f\n", node->b_range);
+
+            if(node->l_range < point_x && point_x <= (node->l_range + node->r_range) / 2 && (node->b_range + node->t_range) / 2 < point_y && point_y < node->t_range){
+                // printf("left top part \n");
                 return find_which_node(node->lt, point_x, point_y);
-            }else if((node->l_range + node->r_range) < point_x <= node->r_range && (node->b_range + node->t_range) / 2 < point_y < node->t_range){
+            }else if((node->l_range + node->r_range) / 2 < point_x && point_x <= node->r_range && (node->b_range + node->t_range) / 2 < point_y && point_y < node->t_range){
+                // printf("right top part \n");
                 return find_which_node(node->rt, point_x, point_y);
-            }else if(node->l_range < point_x <= (node->l_range + node->r_range) / 2 && node->b_range < point_y <= (node->b_range + node->t_range) / 2){
+            }else if(node->l_range < point_x && point_x <= (node->l_range + node->r_range) / 2 && node->b_range < point_y && point_y <= (node->b_range + node->t_range) / 2){
+                // printf("left below part \n");
                 return find_which_node(node->lb, point_x, point_y);
-            }else
+            }else{
+                // printf("right below part \n");
                 return find_which_node(node->rb, point_x, point_y);
+            }
+                
         }
 };
 
@@ -185,7 +199,7 @@ int main(int argc, const char * argv[]){
     LidarNode lidar_header = lidar_tail;
     LidarNode p;
     
-    for(int i = 0; i < 1; i++){
+    for(int i = 0; i < 2; i++){
         p = (LidarNode)malloc(sizeof(struct lidar_node));
         memset(p, 0, sizeof(struct lidar_node));
         p->theta = (float)45;
