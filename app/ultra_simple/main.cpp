@@ -228,7 +228,7 @@ int main(int argc, const char * argv[]) {
                     nodes[pos].dist_mm_q2/4.0f,
                     nodes[pos].quality);
 
-                /* only first fetch one array of lidar information */
+                /* todo, think about how to fetch info multiple times */
                 if (cycle_num == 0){
                     p = (LidarNode)malloc(sizeof(struct lidar_node));
                     p->theta = nodes[pos].angle_z_q14 * 90.f / (1 << 14);

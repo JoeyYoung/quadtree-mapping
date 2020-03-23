@@ -67,13 +67,13 @@ class QuadTree{
             free(root);
         };
 
-        /* if necessary, update corresponding node based on lidar information */
+        /* if necessary, update corresponding node based on lidar info list */
         void update_tree(LidarNode header){
             LidarNode p = header;
             while(p -> next != NULL){
                 p = p -> next;
 
-                /* transfer from dist-theta to  */
+                /* todo, transfer from dist-theta to x-y */
                 float x = walker_x + p->dist * sin(p->theta * PI / 180);
                 float y = walker_y + p->dist * cos(p->theta * PI / 180);
 
@@ -82,7 +82,7 @@ class QuadTree{
             }
         }
 
-        /* update walker position based on odometry */
+        /* todo, update walker position based on odometry */
         void update_walker_pos(float x, float y, float theta){
             walker_x = x;
             walker_y = y;
@@ -98,13 +98,14 @@ class QuadTree{
                 return;
             }
             
-            /* split four children */
+            /* todo, split four children */
 
-            /* according to which children, call extend further */
+            /* todo, according to which children, call extend further */
         }
         
-        /* begin from one node (usually root), find minimum node belongs to */
+        /* begin from one node (usually root), find leaf node belongs to */
         TreeNode find_which_node(TreeNode node, float point_x, float point_y){
+            /* find until leaf node */
             if (node->lt == NULL){
                 return node;
             }
