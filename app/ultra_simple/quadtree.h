@@ -3,6 +3,7 @@
 #include <string.h>
 #include <math.h>
 #include <tuple>
+#include <string>
 
 #define PI 3.1415927
 
@@ -29,6 +30,9 @@ typedef struct tree_node {
     struct tree_node* lt;
     struct tree_node* rb;
     struct tree_node* lb;
+
+    bool occupied;
+
 } *TreeNode;
 
 typedef struct lidar_node {
@@ -85,6 +89,7 @@ class QuadTree{
                 float x = x_y[0];
                 float y = x_y[1];
 
+                /* nothing detected */
                 if(x == walker_x && y == walker_y)
                     continue;
 
@@ -108,8 +113,32 @@ class QuadTree{
 
         // TODO::
         /* show map scanned, show tree constructed */
-        void visualize_tree(){
+        void visualize_tree(TreeNode node){
+            /* print out layer by layer, need queue */
+        }
 
+        /* save x, y points to file */
+        void save_points(LidarNode header, char* filename){
+            FILE *fp = NULL;
+            fp = fopen(filename, "w+");
+            LidarNode p = header;
+
+            while(p -> next != NULL){
+                p = p -> next;
+
+                /* transfer from dist-theta to x-y */
+                float* x_y = transfer_to_point(p->theta, p->dist);
+                float x = x_y[0];
+                float y = x_y[1];
+
+                char out[100];
+                sprintf(out, "%f;%f\n", x, y);
+                /* store into file */
+
+                fprintf(fp, out);
+            }
+
+            fclose(fp);
         }
     
     private:
@@ -173,6 +202,8 @@ class QuadTree{
         
         /* begin from one node, find leaf node belongs to */
         TreeNode find_which_node(TreeNode node, float point_x, float point_y){
+            node->occupied = true;
+
             /* find until leaf node */
             if (node->rt == NULL){
                 return node;

@@ -28,6 +28,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <string>
 
 #include "rplidar.h" //RPLIDAR standard sdk, all-in-one header
 #include "quadtree.h"
@@ -52,7 +53,6 @@ static inline void delay(_word_size_t ms){
 #endif
 
 using namespace rp::standalone::rplidar;
-using namespace std;
 
 bool checkRPLIDARHealth(RPlidarDriver * drv)
 {
@@ -95,19 +95,16 @@ int main(int argc, const char * argv[]) {
 
     // lidar list to store
     LidarNode lidar_tail = (LidarNode)malloc(sizeof(struct lidar_node));
-
-    // emptu header
     LidarNode lidar_header = lidar_tail;
-    // temp store
     LidarNode p;
 
-    int cycle_num = 0;
-    int lidar_num = 0;
-
-    // quad tree
     TreeNode node = (TreeNode)malloc(sizeof(struct tree_node));
     memset(node, 0, sizeof(struct tree_node));
     QuadTree tree = QuadTree(node);
+
+    char* filename = (char*)malloc(sizeof(char)*100);
+
+    int cycle_num = 0;
 
     printf("Ultra simple LIDAR data grabber for RPLIDAR.\n"
            "Version: " RPLIDAR_SDK_VERSION "\n");
@@ -234,28 +231,33 @@ int main(int argc, const char * argv[]) {
                     nodes[pos].dist_mm_q2/4.0f,
                     nodes[pos].quality);
 
-                // TODO:
-                /* think about how to fetch info multiple times */
-                if (cycle_num == 0){
-                    p = (LidarNode)malloc(sizeof(struct lidar_node));
-                    p->theta = nodes[pos].angle_z_q14 * 90.f / (1 << 14);
-                    p->dist = nodes[pos].dist_mm_q2/4.0f;
-                    p->quality = nodes[pos].quality;
-                    p->next = NULL;
-                    lidar_tail->next = p;
-                    lidar_tail = p;
-                }            
+                p = (LidarNode)malloc(sizeof(struct lidar_node));
+                p->theta = nodes[pos].angle_z_q14 * 90.f / (1 << 14);
+                p->dist = nodes[pos].dist_mm_q2/4.0f;
+                p->quality = nodes[pos].quality;
+                p->next = NULL;
+                lidar_tail->next = p;
+                lidar_tail = p;          
             }
         }
 
         cycle_num += 1;
+
+        /* choose output file, add folder link will error, due to root */
+        sprintf(filename, "points%d", cycle_num);
+
+        tree.update_tree(lidar_header);
+        tree.save_points(lidar_header, filename);
+
+        free(lidar_header);
+        lidar_tail = (LidarNode)malloc(sizeof(struct lidar_node));
+        lidar_header = lidar_tail;
+
         if (ctrl_c_pressed){ 
             break;
         }
 
-        if (cycle_num == 1){
-            break;
-        }
+        if(cycle_num == 10) break;
     }
 
     // printf("Here is stored information ... \n");
@@ -265,10 +267,8 @@ int main(int argc, const char * argv[]) {
     //     printf("theta %f, dist %f, quality %f \n", p->theta, p->dist, p->quality);
     // }
     // printf("done\n");
-    
-    tree.update_tree(lidar_header);
+    // free(lidar_header);
 
-    free(lidar_header);
     drv->stop();
     drv->stopMotor();
     // done!
