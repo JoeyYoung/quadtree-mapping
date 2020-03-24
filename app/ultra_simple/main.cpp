@@ -52,6 +52,7 @@ static inline void delay(_word_size_t ms){
 #endif
 
 using namespace rp::standalone::rplidar;
+using namespace std;
 
 bool checkRPLIDARHealth(RPlidarDriver * drv)
 {
@@ -102,6 +103,11 @@ int main(int argc, const char * argv[]) {
 
     int cycle_num = 0;
     int lidar_num = 0;
+
+    // quad tree
+    TreeNode node = (TreeNode)malloc(sizeof(struct tree_node));
+    memset(node, 0, sizeof(struct tree_node));
+    QuadTree tree = QuadTree(node);
 
     printf("Ultra simple LIDAR data grabber for RPLIDAR.\n"
            "Version: " RPLIDAR_SDK_VERSION "\n");
@@ -246,17 +252,23 @@ int main(int argc, const char * argv[]) {
         if (ctrl_c_pressed){ 
             break;
         }
+
+        if (cycle_num == 1){
+            break;
+        }
     }
 
-    printf("Here is stored information ... \n");
-    p = lidar_header;
-    while(p -> next != NULL){
-        p = p -> next;
-        printf("theta %f, dist %f, quality %f \n", p->theta, p->dist, p->quality);
-    }
-    printf("done\n");
+    // printf("Here is stored information ... \n");
+    // p = lidar_header;
+    // while(p -> next != NULL){
+    //     p = p -> next;
+    //     printf("theta %f, dist %f, quality %f \n", p->theta, p->dist, p->quality);
+    // }
+    // printf("done\n");
+    
+    tree.update_tree(lidar_header);
+
     free(lidar_header);
-
     drv->stop();
     drv->stopMotor();
     // done!

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <tuple>
 
 #define PI 3.1415927
 
@@ -28,6 +29,8 @@ typedef struct tree_node {
     struct tree_node* lt;
     struct tree_node* rb;
     struct tree_node* lb;
+
+    bool occupied;
 } *TreeNode;
 
 typedef struct lidar_node {
@@ -46,9 +49,9 @@ class QuadTree{
         TreeNode root;
 
         /* current position of walker */
-        float walker_x = 5.0;
-        float walker_y = 5.0;
-        float walker_theta = 0.0;
+        float walker_x;
+        float walker_y;
+        float walker_theta;
 
         /* build initial tree with only root node, and specific settings */
         QuadTree(TreeNode t):root(t){            
@@ -61,6 +64,11 @@ class QuadTree{
             root->l_range = 0.0;    
 
             printf("Quad Tree is inited with one root node ... \n");
+
+            /* init walker info */
+            walker_x = 5.0;
+            walker_y = 5.0;
+            walker_theta = 0.0;
         }
 
         ~QuadTree(){
@@ -74,10 +82,13 @@ class QuadTree{
             while(p -> next != NULL){
                 p = p -> next;
 
-                // TODO:
                 /* transfer from dist-theta to x-y */
-                float x = walker_x + p->dist * sin(p->theta * PI / 180);
-                float y = walker_y + p->dist * cos(p->theta * PI / 180);
+                float* x_y = transfer_to_point(p->theta, p->dist);
+                float x = x_y[0];
+                float y = x_y[1];
+
+                if(x == walker_x && y == walker_y)
+                    continue;
 
                 TreeNode node = find_which_node(root, x, y);
                 printf("\t=== find point (%f, %f) in leaf node with radius: %f\n", x, y, node->radius);
@@ -95,6 +106,12 @@ class QuadTree{
             walker_theta = theta;
 
             printf("walker position updated ... \n");
+        }
+
+        // TODO::
+        /* show map scanned, show tree constructed */
+        void visualize_tree(){
+            
         }
     
     private:
@@ -158,6 +175,8 @@ class QuadTree{
         
         /* begin from one node, find leaf node belongs to */
         TreeNode find_which_node(TreeNode node, float point_x, float point_y){
+            node->occupied = true;
+
             /* find until leaf node */
             if (node->rt == NULL){
                 return node;
@@ -183,6 +202,41 @@ class QuadTree{
             }
                 
         }
+
+        
+        float* transfer_to_point(float theta, float dist){
+            static float x_y[2];
+            if(theta == 0 || theta == 360){
+                x_y[0] = walker_x;
+                x_y[1] = walker_y + dist/1000.0;
+            }else if(theta > 0 && theta < 90){
+                x_y[0] = walker_x + dist/1000.0 * sin(theta * PI / 180);
+                x_y[1] = walker_y + dist/1000.0 * cos(theta * PI / 180);
+            }else if(theta == 90){
+                x_y[0] = walker_x + dist/1000.0;
+                x_y[1] = walker_y;
+            }else if(theta > 90 && theta < 180){
+                float theta_ = theta - 90;
+                x_y[0] = walker_x + dist/1000.0 * cos(theta_ * PI / 180);
+                x_y[1] = walker_y - dist/1000.0 * sin(theta_ * PI / 180);
+            }else if(theta == 180){
+                x_y[0] = walker_x;
+                x_y[1] = walker_y - dist/1000.0;
+            }else if(theta > 180 && theta < 270){
+                float theta_ = theta - 180;
+                x_y[0] = walker_x - dist/1000.0 * sin(theta_ * PI / 180);
+                x_y[1] = walker_y - dist/1000.0 * cos(theta_ * PI / 180);
+            }else if(theta == 270){
+                x_y[0] = walker_x - dist/1000.0;
+                x_y[1] = walker_y;
+            }else{
+                // 270 - 360
+                float theta_ = theta - 270;
+                x_y[0] = walker_x - dist/1000.0 * cos(theta_ * PI / 180);
+                x_y[1] = walker_y + dist/1000.0 * sin(theta_ * PI / 180);
+            }
+            return x_y;
+        }
 };
 
 int main(int argc, const char * argv[]){
@@ -203,7 +257,7 @@ int main(int argc, const char * argv[]){
         p = (LidarNode)malloc(sizeof(struct lidar_node));
         memset(p, 0, sizeof(struct lidar_node));
         p->theta = (float)45;
-        p->dist = 1;
+        p->dist = 1000;
         p->quality = 60;
 
         lidar_tail->next = p;
@@ -211,7 +265,7 @@ int main(int argc, const char * argv[]){
     }
 
     tree.update_tree(lidar_header);
-    
+
     free(lidar_header);
     return 0;
 }
