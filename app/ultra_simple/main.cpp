@@ -257,7 +257,7 @@ int main(int argc, const char * argv[]) {
             break;
         }
 
-        if(cycle_num == 10) break;
+        if(cycle_num == 50) break;
     }
 
     // printf("Here is stored information ... \n");
