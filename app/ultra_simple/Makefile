@@ -29,7 +29,8 @@ C_INCLUDES += -I$(CURDIR)/../../sdk/include -I$(CURDIR)/../../sdk/src
 EXTRA_OBJ := 
 LD_LIBS += -lstdc++ -lpthread
 
-all: build_app
+# build both execute file and map library
+all: build_app build_map
 
 include $(HOME_TREE)/mak_common.inc
 

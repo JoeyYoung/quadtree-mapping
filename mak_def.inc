@@ -143,7 +143,7 @@ endif
 
 CFLAGS += $(OPT_FLAG) $(CDEFS) $(C_INCLUDES) $(CWARN) $(CSTANDARD) $(CEXTRA) $(CTUNING) -Wstrict-prototypes
 
-CXXFLAGS += $(OPT_FLAG) $(CXXDEFS) $(CXX_INCLUDES) $(CWARN) $(CEXTRA) $(CXXEXTRA) $(CTUNING)
+CXXFLAGS += $(OPT_FLAG) $(CXXDEFS) $(CXX_INCLUDES) $(CWARN) $(CEXTRA) $(CXXEXTRA) $(CTUNING) # -c -fPIC
 
 ASFLAGS += -Wa,-adhlns=$(<:.S=.lst),-gstabs $(CDEFS) $(C_INCLUDES)
 LDFLAGS += $(LD_LIBS)
@@ -151,4 +151,8 @@ LDFLAGS += $(LD_LIBS)
 ALL_CFLAGS = $(CFLAGS)
 ALL_CXXFLAGS = $(CXXFLAGS)
 ALL_ASFLAGS = $(ASFLAGS)
+
+# self defined, to generate .so libaray
+SO_FLAGS_C += -fPIC -shared
+SO_FLAGS_O += -shared
 

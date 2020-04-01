@@ -52,12 +52,16 @@ OBJ += $(patsubst %.c, $(TARGET_OBJ_ROOT)/%.o, $(_CSRC))
 OBJ += $(patsubst %.cpp, $(TARGET_OBJ_ROOT)/%.o, $(_CXXSRC))
 OBJ += $(patsubst %.S, $(TARGET_OBJ_ROOT)/%.o, $(_ASRC))
 
-build_sdk:  $(SDK_TARGET)
+# define .so library
+# SO = $(patsubst %.o, $(TARGET_OBJ_ROOT)/%.so, $(OBJ))
+
+build_sdk: $(SDK_TARGET)
 
 clean_sdk:
 	$(RMDIR) $(TARGET_OBJ_ROOT)
 	$(RM) $(SDK_TARGET)
 
+# target specific .so library
 build_app: $(APP_TARGET)
 
 clean_app:
@@ -68,18 +72,30 @@ $(SDK_TARGET): $(OBJ) $(EXTRA_OBJ)
 	$(MKDIR) `dirname $@`
 	@for i in $^; do echo " pack `basename $$i`->`basename $@`"; $(AR) rcs $@ $$i; done
 	
-$(APP_TARGET): $(OBJ) $(EXTRA_OBJ) $(SDK_TARGET)
+$(APP_TARGET) : $(OBJ) $(EXTRA_OBJ) $(SDK_TARGET)
 	@$(MKDIR) `dirname $@`
 	@echo " LD   $@"
-	$(CMD_HIDE)$(CC) $(ALL_CXXFLAGS) -o $@ $^ $(LDFLAGS)  
+	$(CMD_HIDE)$(CC) $(ALL_CXXFLAGS) -o $@ $^ $(LDFLAGS)
 
+build_map: libmap.so
+
+libmap.so : $(OBJ) $(EXTRA_OBJ) $(SDK_TARGET)
+	@$(MKDIR) `dirname $@`
+	@echo " compile dynamic library  $@"
+	$(CMD_HIDE)$(CC) $(SO_FLAGS_O) -o $@ $^ $(LDFLAGS)
+
+
+# $(SO): $(OBJ)
+# 	@echo " CC Compile .so library $<"
+# 	gcc -shared $^ -o $@
+	
 
 #
 # Compile: create object files from C++ source files.
 $(TARGET_OBJ_ROOT)/%.o: %.cpp
 	@$(MKDIR) `dirname $@`
 	@echo " CXX  $<"
-	$(CMD_HIDE)$(CXX) -c $(ALL_CXXFLAGS) $< -o $@ 
+	$(CMD_HIDE)$(CXX) -c $(ALL_CXXFLAGS) $< -o $@
 
 # Compile: create object files from C source files.
 $(TARGET_OBJ_ROOT)/%.o: %.c
@@ -92,4 +108,13 @@ $(TARGET_OBJ_ROOT)/%.o: %.S
 	@$(MKDIR) `dirname $@`
 	@echo " AS   $<"
 	$(CMD_HIDE)$(CC) -c $(ALL_ASFLAGS) $< -o $@
+
+# Create .so .library to use, extend C, GCC compile
+# gcc -fPIC -shared test.cpp -o test.so
+# $(TARGET_OBJ_ROOT)/%.so: %.cpp
+# 	@$(MKDIR) `dirname $@`
+# 	@echo " CC Compile .so library $<"
+# 	# use the way of GCC to compile cpp
+# 	$(CMD_HIDE)$(CC) $(ALL_SOFLAGS) $< -o $@
+
 
