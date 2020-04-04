@@ -89,7 +89,6 @@ libmap.so : $(OBJ) $(EXTRA_OBJ) $(SDK_TARGET)
 # 	@echo " CC Compile .so library $<"
 # 	gcc -shared $^ -o $@
 	
-
 #
 # Compile: create object files from C++ source files.
 $(TARGET_OBJ_ROOT)/%.o: %.cpp

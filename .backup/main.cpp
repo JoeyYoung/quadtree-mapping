@@ -85,7 +85,7 @@ void ctrlc(int)
     ctrl_c_pressed = true;
 }
 
-void run_main(){
+int main(int argc, const char * argv[]) {
     const char * opt_com_path = NULL;
     _u32         baudrateArray[2] = {115200, 256000};
     _u32         opt_com_baudrate = 0;
@@ -109,11 +109,26 @@ void run_main(){
     printf("Ultra simple LIDAR data grabber for RPLIDAR.\n"
            "Version: " RPLIDAR_SDK_VERSION "\n");
 
-    /* 
-        opt_com_path = "\\\\.\\com57"; win32
-        opt_com_path = "/dev/ttyUSB0"; linux
-    */
-    opt_com_path = "/dev/tty.SLAB_USBtoUART";
+    // read serial port from the command line...
+    if (argc>1) opt_com_path = argv[1]; // or set to a fixed value: e.g. "com3" 
+
+    // read baud rate from the command line if specified...
+    if (argc>2)
+    {
+        opt_com_baudrate = strtoul(argv[2], NULL, 10);
+        useArgcBaudrate = true;
+    }
+
+    if (!opt_com_path) {
+#ifdef _WIN32
+        // use default com port
+        opt_com_path = "\\\\.\\com57";
+#elif __APPLE__
+        opt_com_path = "/dev/tty.SLAB_USBtoUART";
+#else
+        opt_com_path = "/dev/ttyUSB0";
+#endif
+    }
 
     // create the driver instance
 	RPlidarDriver * drv = RPlidarDriver::CreateDriver(DRIVER_TYPE_SERIALPORT);
@@ -188,6 +203,8 @@ void run_main(){
             , devinfo.firmware_version & 0xFF
             , (int)devinfo.hardware_version);
 
+
+
     // check health...
     if (!checkRPLIDARHealth(drv)) {
         goto on_finished;
@@ -243,21 +260,21 @@ void run_main(){
         if(cycle_num == 50) break;
     }
 
+    // printf("Here is stored information ... \n");
+    // p = lidar_header;
+    // while(p -> next != NULL){
+    //     p = p -> next;
+    //     printf("theta %f, dist %f, quality %f \n", p->theta, p->dist, p->quality);
+    // }
+    // printf("done\n");
+    // free(lidar_header);
+
     drv->stop();
     drv->stopMotor();
     // done!
 on_finished:
     RPlidarDriver::DisposeDriver(drv);
     drv = NULL;
-}
-
-extern "C"{
-    /* set to be multiple processes */
-    void run_main_plus(){
-        run_main();
-    }
-}
-
-int main(int argc, const char * argv[]) {
     return 0;
 }
+

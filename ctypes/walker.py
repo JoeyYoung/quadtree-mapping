@@ -1,6 +1,9 @@
 from ctypes import *
 
 add_plus = CDLL('./test.so')
+hi = add_plus.run_plus()
+print(hi)
+
 sum = add_plus.add_integer_plus(4,5)
 print("sum: " + str(sum))
 

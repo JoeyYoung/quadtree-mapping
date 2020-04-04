@@ -111,7 +111,7 @@ class QuadTree{
             printf("walker position updated ... \n");
         }
 
-        // TODO::
+        // TODO:
         /* show map scanned, show tree constructed */
         void visualize_tree(TreeNode node){
             /* print out layer by layer, need queue */
