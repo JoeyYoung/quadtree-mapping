@@ -2,7 +2,11 @@ from ctypes import *
 
 add_plus = CDLL('./libmap.so')
 
-add_plus.run_main_plus()
+x = c_float(2.0)
+y = c_float(2.0)
+theta = c_float(0.0)
+
+add_plus.run_main_plus(x, y, theta)
 
 # sum = add_plus.add_integer_plus(4,5)
 # print("sum: " + str(sum))

@@ -85,7 +85,7 @@ void ctrlc(int)
     ctrl_c_pressed = true;
 }
 
-void run_main(){
+void run_main(float walker_x, float walker_y, float walker_theta){
     const char * opt_com_path = NULL;
     _u32         baudrateArray[2] = {115200, 256000};
     _u32         opt_com_baudrate = 0;
@@ -229,7 +229,7 @@ void run_main(){
         /* choose output file, add folder link will error, due to root */
         sprintf(filename, "points%d", cycle_num);
 
-        tree.update_tree(lidar_header);
+        tree.update_tree(lidar_header, walker_x, walker_y, walker_theta);
         tree.save_points(lidar_header, filename);
 
         free(lidar_header);
@@ -240,7 +240,7 @@ void run_main(){
             break;
         }
 
-        if(cycle_num == 50) break;
+        if(cycle_num == 20) break;
     }
 
     drv->stop();
@@ -252,9 +252,9 @@ on_finished:
 }
 
 extern "C"{
-    /* set to be multiple processes */
-    void run_main_plus(){
-        run_main();
+    /* feed odometry from python */
+    void run_main_plus(float x, float y, float theta){
+        run_main(x, y, theta);
     }
 }
 

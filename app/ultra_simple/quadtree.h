@@ -58,18 +58,18 @@ class QuadTree{
         /* build initial tree with only root node, and specific settings */
         QuadTree(TreeNode t):root(t){            
             /* area is 10 x 10 meters */
-            root->radius = 10.0;
+            root->radius = 20.0;
             
-            root->t_range = 10.0;
+            root->t_range = 20.0;
             root->b_range = 0.0;
-            root->r_range = 10.0;
+            root->r_range = 20.0;
             root->l_range = 0.0;    
 
             printf("Quad Tree is inited with one root node ... \n");
 
             /* init walker info */
-            walker_x = 5.0;
-            walker_y = 5.0;
+            walker_x = 0.0;
+            walker_y = 0.0;
             walker_theta = 0.0;
         }
 
@@ -78,8 +78,11 @@ class QuadTree{
         };
 
         /* if necessary, update corresponding node based on lidar info list */
-        void update_tree(LidarNode header){
-            printf("=== start update tree with lidar info ...\n");
+        void update_tree(LidarNode header, float cur_walker_x, float cur_walker_y, float cur_theta){
+            printf("=== start update tree with lidar info & odmetry info ...\n");
+            
+            update_walker_pos(cur_walker_x, cur_walker_y, cur_theta);
+
             LidarNode p = header;
             while(p -> next != NULL){
                 p = p -> next;
@@ -99,16 +102,6 @@ class QuadTree{
             }
 
             printf("=== update tree done. \n");
-        }
-
-        // TODO:    
-        /* update walker position based on odometry */
-        void update_walker_pos(float x, float y, float theta){
-            walker_x = x;
-            walker_y = y;
-            walker_theta = theta;
-
-            printf("walker position updated ... \n");
         }
 
         // TODO:
@@ -140,7 +133,7 @@ class QuadTree{
 
             fclose(fp);
         }
-    
+
     private:
         /* begin from arbitrary node to extend */
         void extend_children(TreeNode node, float x, float y){
@@ -230,7 +223,6 @@ class QuadTree{
                 
         }
 
-        
         float* transfer_to_point(float theta, float dist){
             static float x_y[2];
             if(theta == 0 || theta == 360){
@@ -263,5 +255,14 @@ class QuadTree{
                 x_y[1] = walker_y + dist/1000.0 * sin(theta_ * PI / 180);
             }
             return x_y;
+        }
+
+        /* update walker position based on odometry */
+        void update_walker_pos(float x, float y, float theta){
+            walker_x = x;
+            walker_y = y;
+            walker_theta = theta;
+
+            printf("walker position updated ... \n");
         }
 };
