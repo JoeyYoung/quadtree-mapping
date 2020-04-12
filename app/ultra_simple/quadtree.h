@@ -57,12 +57,12 @@ class QuadTree{
 
         /* build initial tree with only root node, and specific settings */
         QuadTree(TreeNode t):root(t){            
-            /* area is 10 x 10 meters */
-            root->radius = 20.0;
+            /* area is 20 x 20 meters */
+            root->radius = 40.0;
             
-            root->t_range = 20.0;
+            root->t_range = 40.0;
             root->b_range = 0.0;
-            root->r_range = 20.0;
+            root->r_range = 40.0;
             root->l_range = 0.0;    
 
             printf("Quad Tree is inited with one root node ... \n");
@@ -224,6 +224,11 @@ class QuadTree{
         }
 
         float* transfer_to_point(float theta, float dist){
+            if(theta + walker_theta < 360){
+                theta = theta + walker_theta;
+            }else{
+                theta = theta + walker_theta - 360.0;
+            }
             static float x_y[2];
             if(theta == 0 || theta == 360){
                 x_y[0] = walker_x;

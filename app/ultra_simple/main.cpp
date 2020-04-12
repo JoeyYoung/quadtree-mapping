@@ -85,7 +85,7 @@ void ctrlc(int)
     ctrl_c_pressed = true;
 }
 
-void run_main(float walker_x, float walker_y, float walker_theta){
+void run_main(float walker_x, float walker_y, float walker_theta, int step){
     const char * opt_com_path = NULL;
     _u32         baudrateArray[2] = {115200, 256000};
     _u32         opt_com_baudrate = 0;
@@ -113,7 +113,7 @@ void run_main(float walker_x, float walker_y, float walker_theta){
         opt_com_path = "\\\\.\\com57"; win32
         opt_com_path = "/dev/ttyUSB0"; linux
     */
-    opt_com_path = "/dev/tty.SLAB_USBtoUART";
+    opt_com_path = "/dev/ttyUSB0"; //"/dev/tty.SLAB_USBtoUART";
 
     // create the driver instance
 	RPlidarDriver * drv = RPlidarDriver::CreateDriver(DRIVER_TYPE_SERIALPORT);
@@ -227,7 +227,7 @@ void run_main(float walker_x, float walker_y, float walker_theta){
         cycle_num += 1;
 
         /* choose output file, add folder link will error, due to root */
-        sprintf(filename, "points%d", cycle_num);
+        sprintf(filename, "points%d_step%d", cycle_num, step);
 
         tree.update_tree(lidar_header, walker_x, walker_y, walker_theta);
         tree.save_points(lidar_header, filename);
@@ -240,7 +240,7 @@ void run_main(float walker_x, float walker_y, float walker_theta){
             break;
         }
 
-        if(cycle_num == 20) break;
+        if(cycle_num == 10) break;
     }
 
     drv->stop();
@@ -253,8 +253,8 @@ on_finished:
 
 extern "C"{
     /* feed odometry from python */
-    void run_main_plus(float x, float y, float theta){
-        run_main(x, y, theta);
+    void run_main_plus(float x, float y, float theta, int step){
+        run_main(x, y, theta, step);
     }
 }
 
