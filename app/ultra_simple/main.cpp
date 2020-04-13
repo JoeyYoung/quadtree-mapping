@@ -230,7 +230,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
         sprintf(filename, "points%d_step%d", cycle_num, step);
 
         tree.update_tree(lidar_header, walker_x, walker_y, walker_theta);
-        tree.save_points(lidar_header, filename);
+        // tree.save_points(lidar_header, filename);
 
         free(lidar_header);
         lidar_tail = (LidarNode)malloc(sizeof(struct lidar_node));
@@ -240,7 +240,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
             break;
         }
 
-        if(cycle_num == 10) break;
+        // if(cycle_num == 10) break;
     }
 
     drv->stop();
@@ -259,5 +259,5 @@ extern "C"{
 }
 
 int main(int argc, const char * argv[]) {
-    return 0;
+    run_main(20.0, 20.0, 0.0, 0);
 }
