@@ -241,7 +241,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
             break;
         }
 
-        if(cycle_num == 10){
+        if(cycle_num == 50){
             tree.visualize_tree2file(filename2);
             break;
         }
