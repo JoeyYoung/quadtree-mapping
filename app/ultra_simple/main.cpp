@@ -113,7 +113,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
         opt_com_path = "\\\\.\\com57"; win32
         opt_com_path = "/dev/ttyUSB0"; linux
     */
-    opt_com_path = "/dev/ttyUSB0"; //"/dev/tty.SLAB_USBtoUART";
+    opt_com_path = "/dev/tty.SLAB_USBtoUART";
 
     // create the driver instance
 	RPlidarDriver * drv = RPlidarDriver::CreateDriver(DRIVER_TYPE_SERIALPORT);

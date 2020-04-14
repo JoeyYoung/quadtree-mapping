@@ -4,5 +4,6 @@
         "iosfwd": "cpp",
         "fstream": "cpp",
         "string": "cpp"
-    }
+    },
+    "python.pythonPath": "/Users/xyzhao/opt/anaconda3/envs/tensorflow/bin/python"
 }
