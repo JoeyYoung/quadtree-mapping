@@ -3,7 +3,10 @@
         "tuple": "cpp",
         "iosfwd": "cpp",
         "fstream": "cpp",
-        "string": "cpp"
+        "string": "cpp",
+        "__node_handle": "cpp",
+        "__locale": "cpp",
+        "ios": "cpp"
     },
     "python.pythonPath": "/Users/xyzhao/opt/anaconda3/envs/tensorflow/bin/python"
 }

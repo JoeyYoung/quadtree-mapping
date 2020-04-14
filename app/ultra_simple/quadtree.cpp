@@ -68,6 +68,8 @@ class QuadTree{
         /* p threshold to indicate occupied */
         float occu_thes;
 
+        char buffer[10000];
+
         /* build initial tree with only root node, and specific settings */
         QuadTree(TreeNode t):root(t){            
             /* area is 20 x 20 meters */
@@ -123,19 +125,26 @@ class QuadTree{
                 extend_children(node, x, y);
             }
 
-            printf("=== increase w_p done. \n");
+            printf("\t=== increase w_p done. \n");
 
             // TODO:
 
-            printf("=== decrease w_p done. \n");
+            printf("\t=== decrease w_p done. \n");
 
             printf("=== update tree done. \n");
         }
 
         // TODO:
         /* show map scanned, show tree constructed */
-        void visualize_tree(TreeNode node){
-            /* print out layer by layer, need queue */
+        void visualize_tree2file(char* filename){
+            memset(buffer, 0, sizeof(buffer));
+            visualize_tree(root);
+
+            FILE *fp = NULL;
+            fp = fopen(filename, "w+");
+            fprintf(fp, buffer);
+
+            fclose(fp);
         }
 
         /* save x, y points to file */
@@ -308,7 +317,7 @@ class QuadTree{
             walker_y = y;
             walker_theta = theta;
 
-            printf("walker position updated ... \n");
+            printf("\twalker position updated ... \n");
         }
 
         float convert_w2p(float w){
@@ -324,6 +333,25 @@ class QuadTree{
         void decrease_wp(TreeNode node){
             node->w -= dw;
             node->p = convert_w2p(node->w);
+        }
+
+        void visualize_tree(TreeNode node){
+            /* point out position of all leaf nodes with p > thres */
+            if(node->rt == NULL){
+                // meet leaf node
+                // only draw deepest node with p > thres, max depth is 7, root is 0
+                float depth = log2(root->r_range/node->radius);
+                if(node->p >= occu_thes && depth >= 7){
+                    sprintf(buffer, "%.2f;%.2f;%.2f;%.2f\n", node->l_range, node->r_range, node->b_range, node->t_range);
+                    //printf("\t %.2f-%.2f, %.2f-%.2f. \n", node->l_range, node->r_range, node->b_range, node->t_range);
+                }
+                return;
+            }
+
+            visualize_tree(node->rt);
+            visualize_tree(node->lt);
+            visualize_tree(node->rb);
+            visualize_tree(node->lb);
         }
 };
 
@@ -341,7 +369,7 @@ int main(int argc, const char * argv[]){
     LidarNode lidar_header = lidar_tail;
     LidarNode p;
     
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 20; i++){
         p = (LidarNode)malloc(sizeof(struct lidar_node));
         memset(p, 0, sizeof(struct lidar_node));
         p->theta = (float)45;
@@ -355,8 +383,11 @@ int main(int argc, const char * argv[]){
     tree.update_tree(lidar_header, 20.0, 20.0, 0.0);
 
     char* temp = "pointstest";
+    char* temp2 = "treetest";
 
     tree.save_points(lidar_header, temp);
+
+    tree.visualize_tree2file(temp2);
 
     free(lidar_header);
     return 0;
