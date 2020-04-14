@@ -68,8 +68,6 @@ class QuadTree{
         /* p threshold to indicate occupied */
         float occu_thes;
 
-        char buffer[10000];
-
         /* build initial tree with only root node, and specific settings */
         QuadTree(TreeNode t):root(t){            
             /* area is 20 x 20 meters */
@@ -137,14 +135,11 @@ class QuadTree{
         // TODO:
         /* show map scanned, show tree constructed */
         void visualize_tree2file(char* filename){
-            memset(buffer, 0, sizeof(buffer));
-            visualize_tree(root);
-
             FILE *fp = NULL;
             fp = fopen(filename, "w+");
-            fprintf(fp, buffer);
-
             fclose(fp);
+
+            visualize_tree(root, fp);
         }
 
         /* save x, y points to file */
@@ -335,23 +330,25 @@ class QuadTree{
             node->p = convert_w2p(node->w);
         }
 
-        void visualize_tree(TreeNode node){
+        void visualize_tree(TreeNode node, FILE* fp){
             /* point out position of all leaf nodes with p > thres */
             if(node->rt == NULL){
                 // meet leaf node
                 // only draw deepest node with p > thres, max depth is 7, root is 0
                 float depth = log2(root->r_range/node->radius);
                 if(node->p >= occu_thes && depth >= 7){
+                    char buffer[100];
                     sprintf(buffer, "%.2f;%.2f;%.2f;%.2f\n", node->l_range, node->r_range, node->b_range, node->t_range);
+                    fprintf(fp, buffer);
                     //printf("\t %.2f-%.2f, %.2f-%.2f. \n", node->l_range, node->r_range, node->b_range, node->t_range);
                 }
                 return;
             }
 
-            visualize_tree(node->rt);
-            visualize_tree(node->lt);
-            visualize_tree(node->rb);
-            visualize_tree(node->lb);
+            visualize_tree(node->rt, fp);
+            visualize_tree(node->lt, fp);
+            visualize_tree(node->rb, fp);
+            visualize_tree(node->lb, fp);
         }
 };
 

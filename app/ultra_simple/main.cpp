@@ -103,6 +103,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
     QuadTree tree = QuadTree(node);
 
     char* filename = (char*)malloc(sizeof(char)*100);
+    char* filename2 = "lidar_tree";
 
     int cycle_num = 0;
 
@@ -240,7 +241,10 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
             break;
         }
 
-        // if(cycle_num == 10) break;
+        if(cycle_num == 10){
+            tree.visualize_tree2file(filename2);
+            break;
+        }
     }
 
     drv->stop();
