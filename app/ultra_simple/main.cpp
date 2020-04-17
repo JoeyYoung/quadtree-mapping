@@ -103,7 +103,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
     QuadTree tree = QuadTree(node);
 
     char* filename = (char*)malloc(sizeof(char)*100);
-    char* filename2 = "lidar_tree";
+    char* filename_tree = (char*)malloc(sizeof(char)*100);
 
     int cycle_num = 0;
 
@@ -229,6 +229,7 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
 
         /* choose output file, add folder link will error, due to root */
         sprintf(filename, "points%d_step%d", cycle_num, step);
+        sprintf(filename_tree, "lidar_tree_%d", cycle_num);
 
         tree.update_tree(lidar_header, walker_x, walker_y, walker_theta);
         // tree.save_points(lidar_header, filename);
@@ -241,9 +242,10 @@ void run_main(float walker_x, float walker_y, float walker_theta, int step){
             break;
         }
 
-        if(cycle_num == 50){
-            tree.visualize_tree2file(filename2);
-            break;
+        // cycle_num == 50
+        if(cycle_num % 10 == 0){
+            tree.visualize_tree2file(filename_tree);
+            // break;
         }
     }
 

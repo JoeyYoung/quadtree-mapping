@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+import time
 
 def read_points(inputdirs):
     res = []
@@ -23,9 +24,9 @@ def read_points(inputdirs):
                     res.append(temp)
     return res
 
-def read_tree():
+def read_tree(cycle_num):
     res = []
-    with open("/Users/xyzhao/Desktop/quadtree-mapping/lidar_tree", 'r') as f:
+    with open("/Users/xyzhao/Desktop/quadtree-mapping/lidar_tree_%d" % cycle_num, 'r') as f:
         lines = f.readlines()
         for i in range(len(lines)):
             line = lines[i]
@@ -34,39 +35,32 @@ def read_tree():
             res.append(temp)
     return res
 
-if __name__ == '__main__':
+if __name__ == '__main__':    
     unit = 1000
-    img = np.zeros([unit, unit])
-
-    for i in range(unit):
-        for j in range(unit):
-            img[i][j] = 255
-
-    # dirs = ["./test_step1"]
-    # points = read_points(dirs)
-
-    # for point in points:
-    #     x = int(point[0] * 25)
-    #     y = int(point[1] * 25)
-
-    #     if x > 1000 or y > 1000:
-    #         continue
-    #     img[x][y] = 0
-
-    grids = read_tree()
-    for grid in grids:
-        x1 = round(grid[0] * 25)
-        x2 = round(grid[1] * 25)
-        y1 = round(grid[2] * 25)
-        y2 = round(grid[3] * 25)
-
-        for x in range(x1, x2+1):
-            for y in range(y1, y2+1):
-                if x > 1000 or y > 1000:
-                    continue
-                img[x][y] = 0
+    num = 23 # max number 
+    hz = 10 # number of cycles, every grids store 
 
     cv2.namedWindow("contour", cv2.WINDOW_NORMAL)
-    cv2.imshow("contour", img)
 
-    cv2.waitKey()
+    for n in range(1, num+1):
+        img = np.zeros([unit, unit])
+
+        for i in range(unit):
+            for j in range(unit):
+                img[i][j] = 255
+        
+        grids = read_tree(n * hz)
+        for grid in grids:
+            x1 = round(grid[0] * 25)
+            x2 = round(grid[1] * 25)
+            y1 = round(grid[2] * 25)
+            y2 = round(grid[3] * 25)
+
+            for x in range(x1, x2+1):
+                for y in range(y1, y2+1):
+                    if x > 1000 or y > 1000:
+                        continue
+                    img[x][y] = 0
+
+        cv2.imshow("contour", img)
+        cv2.waitKey()

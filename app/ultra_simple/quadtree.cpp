@@ -364,7 +364,7 @@ class QuadTree{
 
         void decrease_wp(TreeNode node){
             if(node->w > -dw_max_abs)
-                node->w -= 2*dw;
+                node->w -= 20*dw;
             node->p = convert_w2p(node->w);
         }
 
